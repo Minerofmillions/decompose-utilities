@@ -1,11 +1,14 @@
+import java.net.URI
+
 plugins {
     kotlin("jvm") version "2.0.0"
     `java-library`
     `maven-publish`
+    id("co.uzzu.dotenv.gradle") version "4.0.0"
 }
 
 group = "io.github.minerofmillions"
-version = "1.0"
+version = "1.0.1"
 
 repositories {
     mavenCentral()
@@ -38,6 +41,17 @@ publishing {
     publications {
         create<MavenPublication>("decomposeUtilities") {
             from(components["java"])
+        }
+    }
+
+    repositories {
+        maven {
+            name = "github"
+            url = URI("https://maven.pkg.github.com/Minerofmillions/decompose-utilities")
+            credentials {
+                username = env.USERNAME.orNull() ?: System.getenv("USERNAME")
+                password = env.PACKAGES_TOKEN.orNull() ?: System.getenv("PACKAGES_TOKEN")
+            }
         }
     }
 }
