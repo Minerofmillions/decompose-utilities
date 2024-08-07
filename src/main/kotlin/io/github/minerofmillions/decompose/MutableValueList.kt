@@ -18,6 +18,7 @@ class MutableValueList<E> internal constructor(private var _value: List<E>) : Mu
 
     private fun setValue(value: List<E>): Boolean {
         lock.synchronized {
+            if (_value.iterableEquals(value)) return false
             _value = value
 
             if (isEmitting) {
@@ -113,7 +114,7 @@ class MutableValueList<E> internal constructor(private var _value: List<E>) : Mu
 
     override fun removeAt(index: Int): E {
         val prevValue = get(index)
-        if (!setValue(slice(0 until index) + slice(index + 1 until size)))
+        if (!setValue(value.subList(0, index) + value.subList(index + 1, value.size)))
             error("Failed to removeAt $index")
         return prevValue
     }
@@ -121,14 +122,15 @@ class MutableValueList<E> internal constructor(private var _value: List<E>) : Mu
     override fun subList(fromIndex: Int, toIndex: Int): MutableList<E> {
         val view = MutableValueList(value.subList(fromIndex, toIndex))
         view.subscribe { sublist ->
-            setValue(slice(0 until fromIndex) + sublist + slice(toIndex + 1 until size))
+            setValue(value.subList(0, fromIndex) + sublist + value.subList(toIndex, size))
         }
         return view
     }
 
     override fun set(index: Int, element: E): E {
         val prevValue = get(index)
-        if (!setValue(slice(0 until index) + element + slice(index + 1 until size)))
+        if (prevValue == element) return prevValue
+        if (!setValue(value.subList(0, index) + element + value.subList(index + 1, size)))
             error("Failed to set value.")
         return prevValue
     }
@@ -143,7 +145,7 @@ class MutableValueList<E> internal constructor(private var _value: List<E>) : Mu
 
     override fun remove(element: E): Boolean {
         val index = indexOf(element).takeIf { it > -1 } ?: return false
-        return setValue(slice(0 until index) + slice(index + 1 until size))
+        return setValue(value.subList(0, index) + value.subList(index + 1, size))
     }
 
     override fun lastIndexOf(element: E): Int = value.lastIndexOf(element)
@@ -157,7 +159,7 @@ class MutableValueList<E> internal constructor(private var _value: List<E>) : Mu
     override fun addAll(elements: Collection<E>): Boolean = setValue(value + elements)
 
     override fun addAll(index: Int, elements: Collection<E>): Boolean =
-        setValue(slice(0 until index) + elements + slice(index until size))
+        setValue(value.subList(0, index) + elements + value.subList(index, size))
 
     override fun add(index: Int, element: E) {
         setValue(slice(0 until index) + element + slice(index until size))
@@ -206,4 +208,15 @@ class MutableValueList<E> internal constructor(private var _value: List<E>) : Mu
             list[lastIndex] = element
         }
     }
+}
+
+internal fun <T> Iterable<T>.iterableEquals(other: Iterable<T>): Boolean {
+    val myIterator = iterator()
+    val otherIterator = other.iterator()
+
+    while (myIterator.hasNext() && otherIterator.hasNext()) {
+        if (myIterator.next() != otherIterator.next()) return false
+    }
+
+    return !myIterator.hasNext() && !otherIterator.hasNext()
 }
