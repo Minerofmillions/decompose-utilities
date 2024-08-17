@@ -43,3 +43,16 @@ jobs:
       env:
         USERNAME: ${{ github.actor }}
         PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  createRelease:
+    needs: [ build ]
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Release
+        id: createRelease
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          make_latest: true
