@@ -21,9 +21,9 @@ fun <T : Any> Collection<Value<T>>.collect(): Value<List<T>> = CollectingListVal
  */
 fun <T, R : Any> Iterable<T>.collect(transform: (T) -> Value<R>): Value<List<R>> = CollectingListValue(map(transform))
 
-fun <T : Any> Array<Value<T>>.collect(): Value<List<T>> = CollectingListValue(toList())
+fun <T : Any> Array<out Value<T>>.collect(): Value<List<T>> = CollectingListValue(toList())
 
-fun <T, R : Any> Array<T>.collect(transform: (T) -> Value<R>): Value<List<R>> = CollectingListValue(map(transform))
+fun <T, R : Any> Array<out T>.collect(transform: (T) -> Value<R>): Value<List<R>> = CollectingListValue(map(transform))
 
 private class CollectingListValue<T : Any>(private val upstream: Collection<Value<T>>) : AbstractValue<List<T>>() {
     init {
