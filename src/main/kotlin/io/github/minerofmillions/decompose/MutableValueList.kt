@@ -8,9 +8,11 @@ import com.arkivanov.decompose.value.Value
  *
  * @see collect
  */
-fun <E> mutableValueListOf(vararg elements: E) = MutableValueList(listOf(*elements))
+fun <E> mutableValueListOf(vararg elements: E): MutableValueList<E> = MutableValueListImpl(listOf(*elements))
 
-class MutableValueList<E> internal constructor(private var _value: List<E>) : MutableList<E>, Value<List<E>>() {
+sealed class MutableValueList<E> : MutableList<E>, Value<List<E>>()
+
+private class MutableValueListImpl<E>(private var _value: List<E>) : MutableValueList<E>() {
     private val observers = mutableMapOf<(List<E>) -> Unit, Boolean>()
     private val lock = Lock()
     private var isEmitting = false
@@ -120,7 +122,7 @@ class MutableValueList<E> internal constructor(private var _value: List<E>) : Mu
     }
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableList<E> {
-        val view = MutableValueList(value.subList(fromIndex, toIndex))
+        val view = MutableValueListImpl(value.subList(fromIndex, toIndex))
         view.subscribe { sublist ->
             setValue(value.subList(0, fromIndex) + sublist + value.subList(toIndex, size))
         }
