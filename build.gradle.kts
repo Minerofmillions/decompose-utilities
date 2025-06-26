@@ -1,12 +1,12 @@
 plugins {
-    kotlin("jvm") version "2.0.0"
+    kotlin("jvm") version "2.2.0"
     `java-library`
     `maven-publish`
     id("co.uzzu.dotenv.gradle") version "4.0.0"
 }
 
 group = "io.github.minerofmillions"
-version = "1.0.4"
+version = "1.0.5"
 
 repositories {
     mavenCentral()
@@ -14,7 +14,7 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
-    api("com.arkivanov.decompose:decompose:3.1.0")
+    api("com.arkivanov.decompose:decompose:3.3.0")
 }
 
 tasks.test {
