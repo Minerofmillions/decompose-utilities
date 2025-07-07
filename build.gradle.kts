@@ -2,7 +2,6 @@ plugins {
     kotlin("jvm") version "2.2.0"
     `java-library`
     `maven-publish`
-    id("co.uzzu.dotenv.gradle") version "4.0.0"
 }
 
 group = "io.github.minerofmillions"
@@ -47,8 +46,8 @@ publishing {
             name = "github"
             url = uri("https://maven.pkg.github.com/Minerofmillions/decompose-utilities")
             credentials {
-                username = env.USERNAME.orNull() ?: System.getenv("USERNAME")
-                password = env.PACKAGES_TOKEN.orNull() ?: System.getenv("PACKAGES_TOKEN")
+                username = project.findProperty("gpr.user") as? String ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") as? String ?: System.getenv("PACKAGES_TOKEN")
             }
         }
     }
