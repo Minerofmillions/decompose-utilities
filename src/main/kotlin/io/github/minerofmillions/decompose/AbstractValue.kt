@@ -13,7 +13,10 @@ abstract class AbstractValue<T : Any> : Value<T>() {
     private var isEmitting = false
     private val observers = mutableMapOf<(T) -> Unit, Boolean>()
 
-    override val value: T get() = lock.synchronized { _value }
+    override val value: T get() {
+        if (!this::_value.isInitialized) updateValue()
+        return lock.synchronized { _value }
+    }
 
     protected abstract fun generateValue(): T
 
